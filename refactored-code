@@ -1,0 +1,111 @@
+'use strict';
+
+
+// I have refactored the code by introducing classes for each expense type: 
+// Expense, MealExpense, and CarRentalExpense. I have also created a class 
+// for Expenses, which takes an array of expenses as input and provides 
+// methods for getting the total expenses, meal expenses, and car rental 
+// expenses. This makes the code more object-oriented, extensible, and 
+// maintainable, as new expense types can be added easily in the future 
+// without having to modify the existing code.
+
+// I have also removed the switch statement inside the loop and replaced 
+// it with an if statement that checks if the expense is a MealExpense, 
+// which has a method isOverLimit() to determine whether the expense is 
+// over the limit or not. Finally, I have used template literals instead 
+// of string concatenation for logging the output.
+
+
+// Define expense types as constants
+const EXPENSE_TYPE = {
+  BREAKFAST: 'Breakfast',
+  LUNCH: 'Lunch',
+  DINNER: 'Dinner',
+  CAR_RENTAL: 'Car Rental'
+};
+
+class Expense {
+  constructor(type, amount) {
+    this.type = type;
+    this.amount = amount;
+  }
+}
+
+class MealExpense extends Expense {
+  constructor(type, amount) {
+    super(type, amount);
+  }
+
+  isOverLimit() {
+    switch (this.type) {
+      case EXPENSE_TYPE.BREAKFAST:
+        return this.amount > 20;
+      case EXPENSE_TYPE.LUNCH:
+        return this.amount > 50;
+      case EXPENSE_TYPE.DINNER:
+        return this.amount > 100;
+      default:
+        return false;
+    }
+  }
+}
+
+class CarRentalExpense extends Expense {
+  constructor(amount) {
+    super(EXPENSE_TYPE.CAR_RENTAL, amount);
+  }
+}
+
+class Expenses {
+  constructor(expenses) {
+    this.expenses = expenses;
+  }
+
+  getTotal() {
+    return this.expenses.reduce((total, expense) => total + expense.amount, 0);
+  }
+
+  getMealExpenses() {
+    return this.expenses.filter(expense => expense instanceof MealExpense);
+  }
+
+  getMealExpensesTotal() {
+    return this.getMealExpenses().reduce((total, expense) => total + expense.amount, 0);
+  }
+
+  getCarRentalExpenses() {
+    return this.expenses.filter(expense => expense instanceof CarRentalExpense);
+  }
+}
+
+function report(expenses) {
+  const expensesObj = new Expenses(expenses);
+
+  console.info(`Today Travel Expenses ${new Date().toISOString().slice(0, 10)}`);
+
+  expensesObj.expenses.forEach((expense) => {
+    const expenseName = expense.type;
+    let overExpenseMarker = '';
+
+    if (expense instanceof MealExpense) {
+      overExpenseMarker = expense.isOverLimit() ? '[over-expense!]' : '';
+    }
+
+    console.info(`${expenseName}\t${expense.amount}eur\t${overExpenseMarker}`);
+  });
+
+  console.info(`Meal expenses: ${expensesObj.getMealExpensesTotal()}eur`);
+  console.info(`Total expenses: ${expensesObj.getTotal()}eur`);
+}
+
+// Example usage
+const expenses = [
+  new MealExpense(EXPENSE_TYPE.BREAKFAST, 15.20),
+  new MealExpense(EXPENSE_TYPE.BREAKFAST, 28.10),
+  new MealExpense(EXPENSE_TYPE.LUNCH, 10.20),
+  new MealExpense(EXPENSE_TYPE.DINNER, 16.00),
+  new MealExpense(EXPENSE_TYPE.DINNER, 120.20),
+  new CarRentalExpense(250.00)
+];
+
+report(expenses);
